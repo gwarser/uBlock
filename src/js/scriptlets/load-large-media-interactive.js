@@ -50,9 +50,9 @@ var mediaNotLoaded = function(elem) {
     switch ( elem.localName ) {
     case 'audio':
     case 'video':
-        // Not sure this will always work, I see this just now on
         // http://demos.flowplayer.org/videotest/minimal.html
         // https://html.spec.whatwg.org/multipage/media.html#network-states
+        // We are too fast, and networkState may be NETWORK_LOADING sometimes
         return elem.error !== null || elem.networkState === elem.NETWORK_NO_SOURCE;
     case 'img':
         if ( elem.naturalWidth !== 0 || elem.naturalHeight !== 0 ) {
@@ -91,6 +91,10 @@ var surveyMissingMediaElements = function() {
     return largeMediaElementCount;
 };
 
+// We are too fast - this may be 0 sometimes.
+// Last video here https://www.quirksmode.org/html5/tests/video.html
+// For now I hope we will find at least one element,
+// we will find all others in window.onload
 if ( surveyMissingMediaElements() === 0 ) {
     return;
 }
@@ -137,7 +141,7 @@ var stayOrLeave = (function() {
         }
         vAPI.loadLargeMediaInteractive = false;
         document.removeEventListener('error', onLoadError, true);
-        document.removeEventListener('click', onMouseClick, true);
+        document.removeEventListener('click', onMouseClick, true);//
     };
 
     return function(leaveNow) {
@@ -210,6 +214,13 @@ var onLoad = function(ev) {
 };
 
 document.addEventListener('load', onLoad, true);
+document.addEventListener('loadeddata', onLoad, true);//for video
+
+/******************************************************************************/
+
+window.addEventListener('load', function() {
+    surveyMissingMediaElements();
+}, false);
 
 /******************************************************************************/
 
