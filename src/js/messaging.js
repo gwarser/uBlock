@@ -1236,7 +1236,7 @@ var onMessage = function(request, sender, callback) {
 
     case 'temporarilyAllowLargeMediaElement':
         if ( pageStore !== null ) {
-            pageStore.allowLargeMediaElementsUntil = Date.now() + 2000;
+            pageStore.allowLargeMediaElementsUntil = Date.now() + 4000;
         }
         break;
 

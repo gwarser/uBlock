@@ -44,13 +44,16 @@ var largeMediaElementSelector =
 
 var mediaNotLoaded = function(elem) {
     var src = elem.getAttribute('src') || '';
-    if ( src === '' ) {
+    if ( src === '' && !elem.querySelector(':scope > source') ) {
         return false;
     }
     switch ( elem.localName ) {
     case 'audio':
     case 'video':
-        return elem.error !== null;
+        // Not sure this will always work, I see this just now on
+        // http://demos.flowplayer.org/videotest/minimal.html
+        // https://html.spec.whatwg.org/multipage/media.html#network-states
+        return elem.error !== null || elem.networkState === elem.NETWORK_NO_SOURCE;
     case 'img':
         if ( elem.naturalWidth !== 0 || elem.naturalHeight !== 0 ) {
             break;
@@ -167,14 +170,22 @@ var onMouseClick = function(ev) {
         return;
     }
 
-    var src = elem.getAttribute('src');
-    elem.removeAttribute('src');
+    var src = elem.getAttribute('src') || '';
+    if (src === '' && elem.localName === 'video') {
+        var onLargeMediaElementAllowed = function() {
+            elem.setAttribute('autoplay', '');
+            elem.load();
+            stayOrLeave();
+        };
+    } else {
+        elem.removeAttribute('src');
 
-    var onLargeMediaElementAllowed = function() {
-        elem.setAttribute('src', src);
-        elem.removeAttribute(largeMediaElementAttribute);
-        stayOrLeave();
-    };
+        var onLargeMediaElementAllowed = function() {
+            elem.setAttribute('src', src);
+            elem.removeAttribute(largeMediaElementAttribute);
+            stayOrLeave();
+        };
+    }
 
     vAPI.messaging.send(
         'scriptlets',
