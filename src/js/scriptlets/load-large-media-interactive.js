@@ -177,8 +177,8 @@ var onMouseClick = function(ev) {
     var src = elem.getAttribute('src') || '';
     if (src === '' && elem.localName === 'video') {
         var onLargeMediaElementAllowed = function() {
-            elem.setAttribute('autoplay', '');
             elem.load();
+            elem.play();
             stayOrLeave();
         };
     } else {
